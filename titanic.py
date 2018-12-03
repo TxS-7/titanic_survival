@@ -1,8 +1,9 @@
+#!/usr/bin/python
 import pandas as pd
 from sklearn import preprocessing
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, make_scorer
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 import math
 
@@ -20,34 +21,26 @@ def run():
     train_data['SexEncoded'] = sex_encoded
 
     # Find average age used to replace NaN ages
-    sum = 0
-    count = 0
-    for i in range(len(train_data)):
-        val = train_data['Age'][i]
-        if not math.isnan(val):
-            sum += val
-            count += 1
-    avg_age = float(sum) / count
+    avg_age = train_data['Age'].mean()
 
     # Replace NaN age with average age
-    train_data.fillna(avg_age, inplace=True)
+    train_data['Age'].fillna(avg_age, inplace=True)
 
     # TODO: Keep cabin letter to note location of passenger
     # Check if passenger has a cabin
-    """train_data['HasCabin'] = [0 for x in range(len(train_data))]
+    train_data['HasCabin'] = [0 for x in range(len(train_data))]
     for i in range(len(train_data)):
-        if train_data['Cabin'][i] == "":
+        if pd.isna(train_data['Cabin'][i]):
             train_data.at[i, 'HasCabin'] = 0
         else:
-            train_data.at[i, 'HasCabin'] = 1"""
+            train_data.at[i, 'HasCabin'] = 1
 
 
     # Some features are not important (like passenger ID and name)
-    #features = ['Pclass', 'SexEncoded', 'Age', 'Family', 'HasCabin']
-    features = ['Pclass', 'SexEncoded', 'Age', 'Family']
+    features = ['Pclass', 'SexEncoded', 'Age', 'Family', 'HasCabin']
     target = train_data['Survived']
 
-    clf = RandomForestClassifier()
+    clf = RandomForestClassifier(n_estimators=500, max_depth=4)
     #clf = SVC(kernel="linear")
 
     # Perform 10-fold cross validation to evaluate the classifier
@@ -60,3 +53,4 @@ if __name__ == "__main__":
     print "[*] 10-fold cross validation results:"
     for val in scores:
         print "\t" + str(val)
+    print "[*] Average: " + str(sum(scores) / float(len(scores)))
