@@ -26,6 +26,12 @@ def create_df(filename):
     # Replace NaN age with average age
     df['Age'].fillna(avg_age, inplace=True)
 
+    # Encode embarked location to a number
+    emb_encoder = preprocessing.LabelEncoder()
+    emb_encoder.fit(df['Embarked'])
+    emb_encoded = emb_encoder.transform(df['Embarked'])
+    df['EmbarkedEncoded'] = emb_encoded
+
     # TODO: Keep cabin letter to note location of passenger
     # Check if passenger has a cabin
     df['HasCabin'] = [0 for x in range(len(df))]
@@ -39,7 +45,7 @@ def create_df(filename):
 
 def run(train_data):
     # Some features are not important (like passenger ID and name)
-    features = ['Pclass', 'SexEncoded', 'Age', 'Family', 'HasCabin']
+    features = ['Pclass', 'SexEncoded', 'Age', 'Family', 'EmbarkedEncoded']
     target = train_data['Survived']
 
     clf = RandomForestClassifier(n_estimators=500, max_depth=4)
@@ -51,7 +57,7 @@ def run(train_data):
 
 
 def predict(train_data, test_data):
-    features = ['Pclass', 'SexEncoded', 'Age', 'Family', 'HasCabin']
+    features = ['Pclass', 'SexEncoded', 'Age', 'Family', 'EmbarkedEncoded']
     target = train_data['Survived']
 
     clf = RandomForestClassifier(n_estimators=500, max_depth=4)
